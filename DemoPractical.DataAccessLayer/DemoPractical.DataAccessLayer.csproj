@@ -21,11 +21,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DemoPractical.Domain\DemoPractical.Domain.csproj" />
     <ProjectReference Include="..\DemoPractical.Models\DemoPractical.Models.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Repositories\" />
   </ItemGroup>
 
 </Project>
