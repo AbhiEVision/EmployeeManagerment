@@ -1,14 +1,15 @@
-﻿using DemoPractical.Models.Models;
+﻿using DemoPractical.Models.DTOs;
+using DemoPractical.Models.Models;
 
 namespace DemoPractical.Domain.Interface
 {
 	public interface IEmployeeRepository
 	{
-		Task<IEnumerable<Employee>> GetEmployeesAsync();
+		Task<IEnumerable<EmployeeDetailsDTO>> GetEmployeeDetailsAsync();
 
 		Task<Employee> GetEmployeeById(int id);
 
-		Task EditEmployee(Employee employee);
+		Task EditEmployeeDetails(int empId, EmployeeDetailsDTO employee);
 
 		Task DeleteEmployee(Employee employee);
 
@@ -17,5 +18,7 @@ namespace DemoPractical.Domain.Interface
 		Task<Department> GetEmployeeDepartment(int empId);
 
 		Task ChangeEmployeeDepartment(int empId, int depId);
+
+		Task<EmployeeDetailsDTO> GetEmployeeDetails(int empId);
 	}
 }

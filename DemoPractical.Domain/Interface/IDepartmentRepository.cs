@@ -18,5 +18,7 @@ namespace DemoPractical.Domain.Interface
 		Task DeleteDepartment(int depId);
 
 		Task AddDepartment(Department department);
+
+		Task<bool> IsDepartmentExists(int depId);
 	}
 }
