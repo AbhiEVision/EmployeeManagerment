@@ -15,8 +15,7 @@ namespace DemoPractical.DataAccessLayer.ValidationClass
 			RuleFor(x => x.DepartmentName)
 				.NotNull()
 				.NotEmpty()
-				.Length(1, 50)
-				.WithMessage("Department Name must be between 1 to 50");
+				.Length(1, 50);
 
 		}
 	}
