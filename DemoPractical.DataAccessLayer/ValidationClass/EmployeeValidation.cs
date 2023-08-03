@@ -46,7 +46,7 @@ namespace DemoPractical.DataAccessLayer.ValidationClass
 				.NotNull();
 
 			// Employee type validation
-			RuleFor(x => x.EmployeeType)
+			RuleFor(x => x.EmployeeTypeId)
 				.NotNull();
 		}
 	}
