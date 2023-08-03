@@ -1,4 +1,5 @@
-﻿using DemoPractical.Models.Models;
+﻿using DemoPractical.DataAccessLayer.SeedData;
+using DemoPractical.Models.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace DemoPractical.DataAccessLayer.Data
@@ -24,6 +25,10 @@ namespace DemoPractical.DataAccessLayer.Data
 		{
 			modelBuilder.Entity<ConractBaseEmployee>().HasKey(x => x.EmployeeID);
 			modelBuilder.Entity<PermentEmployee>().HasKey(x => x.EmployeeId);
+
+			// Seed Data
+			modelBuilder.SeedDepartments();
+			modelBuilder.SeedEmployeeTypes();
 		}
 
 	}
