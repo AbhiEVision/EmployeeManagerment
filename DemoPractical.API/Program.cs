@@ -1,3 +1,5 @@
+using System.Collections.Immutable;
+using DemoPractical.API.Services;
 using DemoPractical.API.Swagger;
 using DemoPractical.DataAccessLayer.Data;
 using DemoPractical.DataAccessLayer.Repositories;
@@ -5,6 +7,7 @@ using DemoPractical.DataAccessLayer.ValidationClass;
 using DemoPractical.Domain.Interface;
 using DemoPractical.Models.DTOs;
 using DemoPractical.Models.Models;
+using DemoPractical.Models.ViewModel;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
@@ -35,10 +38,17 @@ builder.Services.AddScoped<IValidator<Department>, DepartmentValidation>();
 builder.Services.AddScoped<IValidator<Employee>, EmployeeValidation>();
 builder.Services.AddScoped<IValidator<PermentEmployee>, PermanentEmployeeValidation>();
 builder.Services.AddScoped<IValidator<CreateEmployeeDTO>, CreateEmployeeDTOValidation>();
+builder.Services.AddScoped<IValidator<EmailModel>, EmailModelValidation>();
 
 // Register Repositories
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddScoped<IDepartmentRepository, DepartmentRepository>();
+
+// Register Services
+builder.Services.AddSingleton<IEmailService, EmailService>();
+
+// Object
+builder.Services.AddSingleton<EmailConfigurations>(builder.Configuration.GetSection("EmailConfigurations").Get<EmailConfigurations>());
 
 // Swagger options registrations
 builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, SwaggerConfigurationOptions>();
