@@ -26,6 +26,9 @@ namespace DemoPractical.DataAccessLayer.Data
 			modelBuilder.Entity<ConractBaseEmployee>().HasKey(x => x.EmployeeID);
 			modelBuilder.Entity<PermentEmployee>().HasKey(x => x.EmployeeId);
 
+			modelBuilder.Entity<Department>().HasMany<Employee>().WithOne(x => x.Department).HasForeignKey(x => x.DepartmentId).OnDelete(DeleteBehavior.SetNull);
+
+
 			// Seed Data
 			modelBuilder.SeedDepartments();
 			modelBuilder.SeedEmployeeTypes();
