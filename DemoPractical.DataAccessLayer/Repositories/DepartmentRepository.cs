@@ -94,6 +94,11 @@ namespace DemoPractical.DataAccessLayer.Repositories
 			return departments;
 		}
 
+		/// <summary>
+		/// Return the employees from given department id
+		/// </summary>
+		/// <param name="departmentId"></param>
+		/// <returns></returns>
 		public async Task<IEnumerable<EmployeeDetailsDTO>> GetEmployeeOfDepartment(int departmentId)
 		{
 			Department department = await _db.Departments.FirstOrDefaultAsync(x => x.Id == departmentId);

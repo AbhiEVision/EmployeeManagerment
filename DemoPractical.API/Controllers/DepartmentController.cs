@@ -159,7 +159,7 @@ namespace DemoPractical.API.Controllers
 
 			if (employeeList == null || employeeList.Count() == 0)
 			{
-				return Ok($"No User Found in {department.DepartmentName} department");
+				return Ok($"No employees Found in {department.DepartmentName} department");
 			}
 
 			return Ok(employeeList);

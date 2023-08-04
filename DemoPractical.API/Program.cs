@@ -1,4 +1,3 @@
-using System.Collections.Immutable;
 using DemoPractical.API.Services;
 using DemoPractical.API.Swagger;
 using DemoPractical.DataAccessLayer.Data;
@@ -21,7 +20,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<ApplicationDataContext>(options =>
 {
-	options.UseSqlServer(builder.Configuration.GetConnectionString("DemoApp"));
+	//options.UseSqlServer(builder.Configuration.GetConnectionString("DemoApp"));
+	options.UseSqlServer(builder.Configuration.GetConnectionString("Laptop"));
 });
 
 
