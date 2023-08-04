@@ -1,6 +1,7 @@
 ﻿using DemoPractical.DataAccessLayer.Data;
 using DemoPractical.Domain.Interface;
 using DemoPractical.Models.DTOs;
+using DemoPractical.Models.Mappers;
 using DemoPractical.Models.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -26,7 +27,7 @@ namespace DemoPractical.DataAccessLayer.Repositories
 		/// <param name="empId">employee id for which we want to change the department</param>
 		/// <param name="depId">department id first check if there is exists or not after that we will update it!</param>
 		/// <returns>Nothing!</returns>
-		public async Task ChangeEmployeeDepartment(int empId, int depId)
+		public async Task ChangeEmployeeDepartmentAsync(int empId, int depId)
 		{
 			bool depExists = await _departmentRepository.IsDepartmentExists(depId);
 			if (depExists)
@@ -46,16 +47,32 @@ namespace DemoPractical.DataAccessLayer.Repositories
 		/// Create employee
 		/// </summary>
 		/// <param name="employee">create this employee</param>
-		public async Task CreateEmployee(Employee employee)
+		public async Task CreateEmployeeAsync(CreateEmployeeDTO employee)
 		{
-			await _db.Employees.AddAsync(employee);
+			Employee toAdd = MappingModels.MapCreateEmployeeClassToEmployeeClass(employee);
+			_db.Employees.Add(toAdd);
 			await _db.SaveChangesAsync();
+			var lastestEmpID = _db.Employees.Max(x => x.Id);
+
+			if (employee.EmployeeTypeId == 1)
+			{
+				PermentEmployee permentEmployee = MappingModels.MapCeateEmployeeClassToPermanentEmployeeClass(lastestEmpID, employee);
+				_db.PermentEmployees.Add(permentEmployee);
+				await _db.SaveChangesAsync();
+			}
+			else if (employee.EmployeeTypeId == 2)
+			{
+				ConractBaseEmployee conractBaseEmployee = MappingModels.MapCreateEmployeeToContratBaseEmployeeClass(lastestEmpID, employee);
+				_db.ConractBaseEmployees.Add(conractBaseEmployee);
+				await _db.SaveChangesAsync();
+			}
+
 		}
 
 		/// <summary>
 		/// Delete Employee using class
 		/// </summary>
-		public async Task DeleteEmployee(Employee employee)
+		public async Task DeleteEmployeeAsync(Employee employee)
 		{
 			Employee getEmp = await _db.Employees.FirstOrDefaultAsync(x => x.Id == employee.Id);
 			if (getEmp == null)
@@ -70,9 +87,9 @@ namespace DemoPractical.DataAccessLayer.Repositories
 		/// <summary>
 		/// Edit the existing employee
 		/// </summary>
-		public async Task EditEmployeeDetails(int empId, EmployeeDetailsDTO employee)
+		public async Task EditEmployeeDetailsAsync(int empId, EmployeeDetailsDTO employee)
 		{
-			Employee oldEmployee = await GetEmployeeById(empId);
+			Employee oldEmployee = await GetEmployeeByIdAsync(empId);
 			if (oldEmployee == null)
 			{
 				return;
@@ -89,7 +106,7 @@ namespace DemoPractical.DataAccessLayer.Repositories
 		/// </summary>
 		/// <param name="id">id for fetch</param>
 		/// <returns >Employee object from database </returns>
-		public async Task<Employee> GetEmployeeById(int id)
+		public async Task<Employee> GetEmployeeByIdAsync(int id)
 		{
 			Employee employee = await _db.Employees.FirstOrDefaultAsync(x => x.Id == id);
 			return employee;
@@ -100,9 +117,9 @@ namespace DemoPractical.DataAccessLayer.Repositories
 		/// </summary>
 		/// <param name="empId"></param>
 		/// <returns>The Department object</returns>
-		public async Task<Department> GetEmployeeDepartment(int empId)
+		public async Task<Department> GetEmployeeDepartmentAsync(int empId)
 		{
-			Employee emp = await GetEmployeeById(empId);
+			Employee emp = await GetEmployeeByIdAsync(empId);
 			if (emp == null || emp.DepartmentId == null)
 			{
 				return null;
@@ -123,6 +140,27 @@ namespace DemoPractical.DataAccessLayer.Repositories
 			return MapListToEmployeeDetails(employees);
 		}
 
+		/// <summary>
+		/// Getting the employee details using its id
+		/// </summary>
+		/// <param name="empId"></param>
+		/// <returns></returns>
+		public async Task<EmployeeDetailsDTO> GetEmployeeDetailsAsync(int empId)
+		{
+			Employee employee = await _db.Employees.FirstOrDefaultAsync(x => x.Id == empId);
+			if (employee == null)
+			{
+				return null;
+			}
+
+			return MapEmployeeToItsDTO(employee);
+		}
+
+		/// <summary>
+		/// Mapping list of employees into employeeDTO
+		/// </summary>
+		/// <param name="employees"></param>
+		/// <returns></returns>
 		private List<EmployeeDetailsDTO> MapListToEmployeeDetails(List<Employee> employees)
 		{
 			var employeeDTOs = new List<EmployeeDetailsDTO>();
@@ -141,6 +179,11 @@ namespace DemoPractical.DataAccessLayer.Repositories
 
 		}
 
+		/// <summary>
+		/// Map Employee to its DTO
+		/// </summary>
+		/// <param name="employee"></param>
+		/// <returns></returns>
 		private EmployeeDetailsDTO MapEmployeeToItsDTO(Employee employee)
 		{
 			var employeeDTO = new EmployeeDetailsDTO();
@@ -151,15 +194,54 @@ namespace DemoPractical.DataAccessLayer.Repositories
 			return employeeDTO;
 		}
 
-		public async Task<EmployeeDetailsDTO> GetEmployeeDetails(int empId)
+		/// <summary>
+		/// Getting the employees which are not in any department
+		/// </summary>
+		/// <returns></returns>
+		public async Task<IEnumerable<EmployeeDetailsDTO>> GetEmployeeWhichAreNotInAnyDepartmentAsync()
 		{
-			Employee employee = await _db.Employees.FirstOrDefaultAsync(x => x.Id == empId);
+			var employees = await _db.Employees.Where(x => x.DepartmentId == null).ToListAsync();
+
+			var employeeDTOs = MapListToEmployeeDetails(employees);
+
+			return employeeDTOs;
+		}
+
+		/// <summary>
+		/// Getting salary details according to its type
+		/// </summary>
+		/// <param name="empId"></param>
+		/// <returns></returns>
+		public async Task<EmployeeSalaryDetails> GetEmployeeSalaryDetailsAsync(int empId)
+		{
+			var employee = await GetEmployeeByIdAsync(empId);
+
 			if (employee == null)
 			{
 				return null;
 			}
 
-			return MapEmployeeToItsDTO(employee);
+			var employeeSalaryDetails = new EmployeeSalaryDetails();
+
+			if (employee.EmployeeTypeId == 1)
+			{
+				employeeSalaryDetails = MappingModels
+					.MapEmployeeSalaryDetailsAndItsPermanentEmployeeDetails(
+						MapEmployeeToItsDTO(employee),
+						await _db.PermentEmployees.Where(x => x.EmployeeId == employee.Id).FirstAsync()
+					);
+			}
+			else
+			{
+				employeeSalaryDetails = MappingModels
+					.MapEmployeeSalaryDetailsAndItsContractBaseEmployeeDetails(
+						MapEmployeeToItsDTO(employee),
+						await _db.ConractBaseEmployees.Where(x => x.EmployeeID == employee.Id).FirstAsync()
+					);
+			}
+
+			return employeeSalaryDetails;
+
 		}
 	}
 }

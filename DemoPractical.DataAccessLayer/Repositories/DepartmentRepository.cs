@@ -1,5 +1,6 @@
 ﻿using DemoPractical.DataAccessLayer.Data;
 using DemoPractical.Domain.Interface;
+using DemoPractical.Models.DTOs;
 using DemoPractical.Models.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -91,6 +92,33 @@ namespace DemoPractical.DataAccessLayer.Repositories
 		{
 			var departments = await _db.Departments.ToListAsync();
 			return departments;
+		}
+
+		public async Task<IEnumerable<EmployeeDetailsDTO>> GetEmployeeOfDepartment(int departmentId)
+		{
+			Department department = await _db.Departments.FirstOrDefaultAsync(x => x.Id == departmentId);
+
+			if (department == null)
+			{
+				return Enumerable.Empty<EmployeeDetailsDTO>();
+			}
+
+			var employees = _db.Departments
+				.Where(x => x.Id == departmentId)
+				.Join
+				(
+					_db.Employees,
+					x => x.Id,
+					x => x.DepartmentId,
+					(dep, emp) => new EmployeeDetailsDTO()
+					{
+						Name = emp.Name,
+						Email = emp.Email,
+						PhoneNumber = emp.PhoneNumber,
+					}
+				);
+
+			return employees;
 		}
 	}
 }
