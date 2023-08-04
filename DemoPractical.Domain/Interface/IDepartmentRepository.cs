@@ -1,4 +1,5 @@
-﻿using DemoPractical.Models.Models;
+﻿using DemoPractical.Models.DTOs;
+using DemoPractical.Models.Models;
 
 namespace DemoPractical.Domain.Interface
 {
@@ -20,5 +21,7 @@ namespace DemoPractical.Domain.Interface
 		Task AddDepartment(Department department);
 
 		Task<bool> IsDepartmentExists(int depId);
+
+		Task<IEnumerable<EmployeeDetailsDTO>> GetEmployeeOfDepartment(int departmentId);
 	}
 }

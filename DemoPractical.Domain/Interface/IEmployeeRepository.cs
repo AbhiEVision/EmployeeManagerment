@@ -7,18 +7,22 @@ namespace DemoPractical.Domain.Interface
 	{
 		Task<IEnumerable<EmployeeDetailsDTO>> GetEmployeeDetailsAsync();
 
-		Task<Employee> GetEmployeeById(int id);
+		Task<Employee> GetEmployeeByIdAsync(int id);
 
-		Task EditEmployeeDetails(int empId, EmployeeDetailsDTO employee);
+		Task EditEmployeeDetailsAsync(int empId, EmployeeDetailsDTO employee);
 
-		Task DeleteEmployee(Employee employee);
+		Task DeleteEmployeeAsync(Employee employee);
 
-		Task CreateEmployee(Employee employee);
+		Task CreateEmployeeAsync(CreateEmployeeDTO employee);
 
-		Task<Department> GetEmployeeDepartment(int empId);
+		Task<Department> GetEmployeeDepartmentAsync(int empId);
 
-		Task ChangeEmployeeDepartment(int empId, int depId);
+		Task ChangeEmployeeDepartmentAsync(int empId, int depId);
 
-		Task<EmployeeDetailsDTO> GetEmployeeDetails(int empId);
+		Task<EmployeeDetailsDTO> GetEmployeeDetailsAsync(int empId);
+
+		Task<IEnumerable<EmployeeDetailsDTO>> GetEmployeeWhichAreNotInAnyDepartmentAsync();
+
+		Task<EmployeeSalaryDetails> GetEmployeeSalaryDetailsAsync(int empId);
 	}
 }
