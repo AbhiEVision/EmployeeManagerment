@@ -3,6 +3,7 @@ using DemoPractical.DataAccessLayer.Data;
 using DemoPractical.DataAccessLayer.Repositories;
 using DemoPractical.DataAccessLayer.ValidationClass;
 using DemoPractical.Domain.Interface;
+using DemoPractical.Models.DTOs;
 using DemoPractical.Models.Models;
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -33,6 +34,7 @@ builder.Services.AddScoped<IValidator<ConractBaseEmployee>, ContractBaseEmployee
 builder.Services.AddScoped<IValidator<Department>, DepartmentValidation>();
 builder.Services.AddScoped<IValidator<Employee>, EmployeeValidation>();
 builder.Services.AddScoped<IValidator<PermentEmployee>, PermanentEmployeeValidation>();
+builder.Services.AddScoped<IValidator<CreateEmployeeDTO>, CreateEmployeeDTOValidation>();
 
 // Register Repositories
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
