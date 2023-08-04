@@ -51,7 +51,7 @@ namespace DemoPractical.API.Controllers
 				return BadRequest("Please enter the valid id");
 			}
 
-			EmployeeDetailsDTO employee = await _employeeRepository.GetEmployeeDetails(id);
+			EmployeeDetailsDTO employee = await _employeeRepository.GetEmployeeDetailsAsync(id);
 
 			if (employee == null)
 			{
@@ -62,11 +62,11 @@ namespace DemoPractical.API.Controllers
 		}
 
 		/// <summary>
-		/// Create employee
+		/// Create employee using create employee DTO
 		/// </summary>
 		/// <param name="employee"></param>
 		[HttpPost]
-		public async Task<IActionResult> CreateEmployee(Employee employee)
+		public async Task<IActionResult> CreateEmployee(CreateEmployeeDTO employee)
 		{
 			if (employee == null)
 			{
@@ -75,7 +75,7 @@ namespace DemoPractical.API.Controllers
 
 			try
 			{
-				await _employeeRepository.CreateEmployee(employee);
+				await _employeeRepository.CreateEmployeeAsync(employee);
 				return Ok("Employee Created!");
 			}
 			catch (Exception ex)
@@ -102,7 +102,7 @@ namespace DemoPractical.API.Controllers
 				return BadRequest("Please Enter the Valid data");
 			}
 
-			Employee emp = await _employeeRepository.GetEmployeeById(id);
+			Employee emp = await _employeeRepository.GetEmployeeByIdAsync(id);
 
 			if (emp == null)
 			{
@@ -111,7 +111,7 @@ namespace DemoPractical.API.Controllers
 
 			try
 			{
-				await _employeeRepository.EditEmployeeDetails(id, employee);
+				await _employeeRepository.EditEmployeeDetailsAsync(id, employee);
 				return Ok($"{employee.Name} is successfully edited!");
 			}
 			catch (Exception ex)
@@ -133,7 +133,7 @@ namespace DemoPractical.API.Controllers
 				return BadRequest("Please enter the valid data");
 			}
 
-			Employee employee = await _employeeRepository.GetEmployeeById(id);
+			Employee employee = await _employeeRepository.GetEmployeeByIdAsync(id);
 			if (employee == null)
 			{
 				return BadRequest("No such data found!");
@@ -141,7 +141,7 @@ namespace DemoPractical.API.Controllers
 
 			try
 			{
-				await _employeeRepository.DeleteEmployee(employee);
+				await _employeeRepository.DeleteEmployeeAsync(employee);
 				return Ok($"{employee.Name} is successfully deleted!");
 			}
 			catch (Exception ex)
@@ -163,7 +163,7 @@ namespace DemoPractical.API.Controllers
 				return BadRequest("Please enter the Valida data");
 			}
 
-			Employee emp = await _employeeRepository.GetEmployeeById(id);
+			Employee emp = await _employeeRepository.GetEmployeeByIdAsync(id);
 
 			if (emp == null)
 			{
@@ -175,7 +175,7 @@ namespace DemoPractical.API.Controllers
 				return Ok($"{emp.Name} is not in any department");
 			}
 
-			Department dep = await _employeeRepository.GetEmployeeDepartment(id);
+			Department dep = await _employeeRepository.GetEmployeeDepartmentAsync(id);
 
 			if (dep == null)
 			{
@@ -198,29 +198,89 @@ namespace DemoPractical.API.Controllers
 				return BadRequest("Please enter the valid data!");
 			}
 
-			Employee emp = await _employeeRepository.GetEmployeeById(data.EmployeeId);
-			Department newDep = await _departmentRepository.GetDepartmentByIdAsync(data.DepartmentId);
-			Department oldDep = await _departmentRepository.GetDepartmentByIdAsync(emp.DepartmentId ?? 0);
+			Employee emp = await _employeeRepository.GetEmployeeByIdAsync(data.EmployeeId);
 
 			if (emp == null)
 			{
 				return BadRequest("No such employee found!");
 			}
 
+			Department newDep = await _departmentRepository.GetDepartmentByIdAsync(data.DepartmentId);
+
 			if (newDep == null)
 			{
 				return BadRequest("No such department found!");
 			}
+			Department oldDep = await _departmentRepository.GetDepartmentByIdAsync(emp.DepartmentId ?? 0);
+
+			string message;
+
+			if (oldDep == null)
+			{
+				message = $"{emp.Name} successfully added to the {newDep.DepartmentName}";
+			}
+			else
+			{
+				message = $"{emp.Name}'s department changed from {oldDep.DepartmentName} to {newDep.DepartmentName}";
+			}
 
 			try
 			{
-				await _employeeRepository.ChangeEmployeeDepartment(data.EmployeeId, data.DepartmentId);
-				return Ok($"{emp.Name}'s department changed from {oldDep.DepartmentName} to {newDep.DepartmentName}");
+				await _employeeRepository.ChangeEmployeeDepartmentAsync(data.EmployeeId, data.DepartmentId);
+				return Ok(message);
 			}
 			catch (Exception ex)
 			{
 				return BadRequest(ex.Message);
 			}
 		}
+
+		/// <summary>
+		/// Get Employees which does not have the departments
+		/// </summary>
+		/// <returns></returns>
+		[HttpGet]
+		public async Task<IActionResult> GetEmployeesWithoutDepartment()
+		{
+			var list = await _employeeRepository.GetEmployeeWhichAreNotInAnyDepartmentAsync();
+
+			if (list == null || list.Count() == 0)
+			{
+				return Ok("No Employee without departments");
+			}
+
+			return Ok(list);
+		}
+
+		/// <summary>
+		/// Get the Employee Salary Details
+		/// </summary>
+		/// <param name="id"></param>
+		/// <returns></returns>
+		[HttpGet]
+		public async Task<IActionResult> GetEmployeeSalaryDetails(int id)
+		{
+			if (id == null || id <= 0)
+			{
+				return BadRequest("Please enter the Valida data");
+			}
+
+			var employee = await _employeeRepository.GetEmployeeByIdAsync(id);
+
+			if (employee == null)
+			{
+				return BadRequest("Employee not found!");
+			}
+
+			var employeeSalaryDetails = await _employeeRepository.GetEmployeeSalaryDetailsAsync(id);
+
+			if (employeeSalaryDetails == null)
+			{
+				return BadRequest("Employee not found");
+			}
+
+			return Ok(employeeSalaryDetails);
+		}
+
 	}
 }

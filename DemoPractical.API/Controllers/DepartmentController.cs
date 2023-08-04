@@ -134,5 +134,35 @@ namespace DemoPractical.API.Controllers
 				return BadRequest(ex.Message);
 			}
 		}
+
+		/// <summary>
+		/// Gives employee list according to the departmentId
+		/// </summary>
+		/// <param name="departmentID"></param>
+		/// <returns></returns>
+		[HttpGet]
+		public async Task<IActionResult> GiveEmployeeByDepartment(int departmentID)
+		{
+			if (departmentID == null || departmentID < 1)
+			{
+				return BadRequest("Please enter the valid data!");
+			}
+
+			Department department = await _departmentRepository.GetDepartmentByIdAsync(departmentID);
+
+			if (department == null)
+			{
+				return BadRequest("No such Department found!");
+			}
+
+			var employeeList = await _departmentRepository.GetEmployeeOfDepartment(departmentID);
+
+			if (employeeList == null || employeeList.Count() == 0)
+			{
+				return Ok($"No User Found in {department.DepartmentName} department");
+			}
+
+			return Ok(employeeList);
+		}
 	}
 }
