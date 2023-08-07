@@ -1,3 +1,5 @@
+using DemoPractical._Domain.Interface;
+using DemoPractical.API.Middleware;
 using DemoPractical.API.Services;
 using DemoPractical.API.Swagger;
 using DemoPractical.DataAccessLayer.Data;
@@ -9,9 +11,13 @@ using DemoPractical.Models.Models;
 using DemoPractical.Models.ViewModel;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using Serilog;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,17 +26,45 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<ApplicationDataContext>(options =>
 {
-	//options.UseSqlServer(builder.Configuration.GetConnectionString("DemoApp"));
-	options.UseSqlServer(builder.Configuration.GetConnectionString("Laptop"));
+	options.UseSqlServer(builder.Configuration.GetConnectionString("DemoApp"));
+	//options.UseSqlServer(builder.Configuration.GetConnectionString("Laptop"));
+});
+
+// Adding Authorization and Authentication
+builder.Services.AddAuthorization();
+builder.Services.AddAuthentication(auth =>
+{
+	auth.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+	auth.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(option =>
+{
+	option.TokenValidationParameters = new TokenValidationParameters()
+	{
+		ValidateIssuer = true,
+		ValidateAudience = true,
+		RequireExpirationTime = true,
+		ValidateLifetime = true,
+		ValidIssuer = builder.Configuration["Jwt:Issuer"],
+		ValidAudience = builder.Configuration["Jwt:Audience"],
+		IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
+		ValidateIssuerSigningKey = true,
+		ClockSkew = TimeSpan.Zero,
+	};
+	option.SaveToken = true;
 });
 
 
+// Register various inbuilt services
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Fluent Validation 
 builder.Services.AddFluentValidationAutoValidation();
+
+// Serilog Registration
+builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
 
 // Register class for fluent validations 
 builder.Services.AddScoped<IValidator<ConractBaseEmployee>, ContractBaseEmployeeValidate>();
@@ -39,6 +73,8 @@ builder.Services.AddScoped<IValidator<Employee>, EmployeeValidation>();
 builder.Services.AddScoped<IValidator<PermentEmployee>, PermanentEmployeeValidation>();
 builder.Services.AddScoped<IValidator<CreateEmployeeDTO>, CreateEmployeeDTOValidation>();
 builder.Services.AddScoped<IValidator<EmailModel>, EmailModelValidation>();
+builder.Services.AddScoped<IValidator<Role>, RoleValidation>();
+builder.Services.AddScoped<IValidator<LoginDTO>, LoginValidation>();
 
 // Register Repositories
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
@@ -46,12 +82,19 @@ builder.Services.AddScoped<IDepartmentRepository, DepartmentRepository>();
 
 // Register Services
 builder.Services.AddSingleton<IEmailService, EmailService>();
+builder.Services.AddSingleton<IJwtServices, JwtServices>();
 
-// Object
+// Error handling class for middleware
+builder.Services.AddTransient<ErrorHandalingMiddleware>();
+
+// Object of Email configuration
 builder.Services.AddSingleton<EmailConfigurations>(builder.Configuration.GetSection("EmailConfigurations").Get<EmailConfigurations>());
 
 // Swagger options registrations
 builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, SwaggerConfigurationOptions>();
+
+// Sentry Registration
+builder.WebHost.UseSentry();
 
 //// API Versing
 //builder.Services.AddApiVersioning(opt =>
@@ -80,8 +123,11 @@ if (app.Environment.IsDevelopment())
 	app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
 
+app.UseHttpsRedirection();
+app.UseMiddleware<ErrorHandalingMiddleware>();
+
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
