@@ -21,17 +21,22 @@ namespace DemoPractical.DataAccessLayer.Data
 
 		public DbSet<ConractBaseEmployee> ConractBaseEmployees { get; set; }
 
+		public DbSet<Role> Roles { get; set; }
+
+		public DbSet<EmployeeRole> EmployeeRoles { get; set; }
+
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<ConractBaseEmployee>().HasKey(x => x.EmployeeID);
 			modelBuilder.Entity<PermentEmployee>().HasKey(x => x.EmployeeId);
+			modelBuilder.Entity<EmployeeRole>().HasKey(x => new { x.RoleId, x.EmployeeId });
 
 			modelBuilder.Entity<Department>().HasMany<Employee>().WithOne(x => x.Department).HasForeignKey(x => x.DepartmentId).OnDelete(DeleteBehavior.SetNull);
-
 
 			// Seed Data
 			modelBuilder.SeedDepartments();
 			modelBuilder.SeedEmployeeTypes();
+			modelBuilder.SeedRole();
 		}
 
 	}
