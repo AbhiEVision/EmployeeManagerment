@@ -24,5 +24,11 @@ namespace DemoPractical.Domain.Interface
 		Task<IEnumerable<EmployeeDetailsDTO>> GetEmployeeWhichAreNotInAnyDepartmentAsync();
 
 		Task<EmployeeSalaryDetails> GetEmployeeSalaryDetailsAsync(int empId);
+
+		Task<Employee> GetEmployeeByEmail(string Email);
+
+		Task<bool> CheckEmployeePassword(LoginDTO model);
+
+		Task<List<string>> GetEmployeeRoles(int empId);
 	}
 }

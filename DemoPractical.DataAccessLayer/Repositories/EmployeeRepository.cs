@@ -49,11 +49,13 @@ namespace DemoPractical.DataAccessLayer.Repositories
 		/// <param name="employee">create this employee</param>
 		public async Task CreateEmployeeAsync(CreateEmployeeDTO employee)
 		{
+			// employee creation logic
 			Employee toAdd = MappingModels.MapCreateEmployeeClassToEmployeeClass(employee);
 			_db.Employees.Add(toAdd);
 			await _db.SaveChangesAsync();
 			var lastestEmpID = _db.Employees.Max(x => x.Id);
 
+			// adding employee type logic
 			if (employee.EmployeeTypeId == 1)
 			{
 				PermentEmployee permentEmployee = MappingModels.MapCeateEmployeeClassToPermanentEmployeeClass(lastestEmpID, employee);
@@ -67,6 +69,8 @@ namespace DemoPractical.DataAccessLayer.Repositories
 				await _db.SaveChangesAsync();
 			}
 
+			// adding employee role logic
+			await AddEmployeeToRole(lastestEmpID, employee.RoleId);
 		}
 
 		/// <summary>
@@ -242,6 +246,97 @@ namespace DemoPractical.DataAccessLayer.Repositories
 
 			return employeeSalaryDetails;
 
+		}
+
+		/// <summary>
+		/// Add Employee to its Role in EmployeeRole Table
+		/// </summary>
+		/// <param name="empId"></param>
+		/// <param name="roleId"></param>
+		private async Task AddEmployeeToRole(int empId, int roleId)
+		{
+			await _db.EmployeeRoles.AddAsync(new EmployeeRole() { EmployeeId = empId, RoleId = roleId });
+			await _db.SaveChangesAsync();
+		}
+
+		/// <summary>
+		/// Get Employee By its Email
+		/// </summary>
+		/// <param name="Email"></param>
+		/// <returns></returns>
+		public async Task<Employee> GetEmployeeByEmail(string Email)
+		{
+			Employee employee = await _db.Employees.SingleOrDefaultAsync(x => x.Email == Email);
+
+			if (employee == null)
+			{
+				return null;
+			}
+
+			return employee;
+		}
+
+		/// <summary>
+		/// Check whether the password is correct or not!
+		/// </summary>
+		/// <param name="model"></param>
+		/// <returns></returns>
+		public async Task<bool> CheckEmployeePassword(LoginDTO model)
+		{
+			Employee employee = await _db.Employees.SingleOrDefaultAsync(x => x.Email == model.Email);
+
+			if (employee == null)
+			{
+				return false;
+			}
+
+			if (employee.Password == model.Password)
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+
+		}
+
+		/// <summary>
+		/// Returning the roles of employee
+		/// </summary>
+		/// <param name="empId"></param>
+		/// <returns></returns>
+		/// <exception cref="NotImplementedException"></exception>
+		public async Task<List<string>> GetEmployeeRoles(int empId)
+		{
+			Employee employee = await _db.Employees.SingleOrDefaultAsync(x => x.Id == empId);
+
+			if (employee == null)
+			{
+				return null;
+			}
+
+			var roles = _db.Employees
+				.Where(x => x.Id == empId)
+				.Join
+				(
+					_db.EmployeeRoles,
+					x => x.Id,
+					x => x.EmployeeId,
+					(x, y) => new
+					{
+						RolesId = y.RoleId
+					}
+				)
+				.Join
+				(
+					_db.Roles,
+					x => x.RolesId,
+					x => x.Id,
+					(x, y) => y.RoleName
+				);
+
+			return await roles.ToListAsync();
 		}
 	}
 }
