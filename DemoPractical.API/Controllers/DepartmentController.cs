@@ -1,9 +1,11 @@
-﻿using DemoPractical.Domain.Interface;
+﻿using DemoPractical.API.Attributes;
+using DemoPractical.Domain.Interface;
 using DemoPractical.Models.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DemoPractical.API.Controllers
 {
+	[Log]
 	[Route("api/[controller]/[action]")]
 	[ApiController]
 	public class DepartmentController : ControllerBase
@@ -57,6 +59,7 @@ namespace DemoPractical.API.Controllers
 		/// </summary>
 		/// <param name="department"></param>
 		/// <returns></returns>
+		[Log]
 		[HttpPost]
 		public async Task<IActionResult> CreateDepartment(Department department)
 		{

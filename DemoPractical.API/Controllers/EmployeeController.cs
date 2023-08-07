@@ -1,3 +1,4 @@
+using DemoPractical.API.Attributes;
 using DemoPractical.Domain.Interface;
 using DemoPractical.Models.DTOs;
 using DemoPractical.Models.Models;
@@ -8,6 +9,7 @@ namespace DemoPractical.API.Controllers
 	/// <summary>
 	/// Employee controller
 	/// </summary>
+	[Log]
 	[Route("api/[controller]/[action]")]
 	[ApiController]
 	public class EmployeeController : ControllerBase
