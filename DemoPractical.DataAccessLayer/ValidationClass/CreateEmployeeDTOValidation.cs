@@ -49,6 +49,16 @@ namespace DemoPractical.DataAccessLayer.ValidationClass
 			RuleFor(x => x.DepartmentId)
 				.NotNull();
 
+			// Employee Role Id
+			RuleFor(x => x.RoleId)
+				.NotNull()
+				.NotEmpty()
+				.GreaterThan(0)
+				.WithMessage("Role id must be grater than 0")
+				.LessThan(3)
+				.WithMessage("Role id must be less than 3");
+
+
 			// Employee type validation
 			RuleFor(x => x.EmployeeTypeId)
 				.NotNull()
