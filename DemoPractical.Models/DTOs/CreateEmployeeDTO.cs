@@ -14,6 +14,8 @@
 
 		public int? DepartmentId { get; set; }
 
+		public int RoleId { get; set; }
+
 		public int? EmployeeTypeId { get; set; }
 
 		public int? HourlyPaid { get; set; }
