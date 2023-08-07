@@ -4,6 +4,7 @@ using DemoPractical.DataAccessLayer.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DemoPractical.DataAccessLayer.Migrations
 {
     [DbContext(typeof(ApplicationDataContext))]
-    partial class ApplicationDataContextModelSnapshot : ModelSnapshot
+    [Migration("20230807100427_AddRolesForJWT")]
+    partial class AddRolesForJWT
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -108,21 +111,6 @@ namespace DemoPractical.DataAccessLayer.Migrations
                     b.HasIndex("EmployeeTypeId");
 
                     b.ToTable("Employees");
-                });
-
-            modelBuilder.Entity("DemoPractical.Models.Models.EmployeeRole", b =>
-                {
-                    b.Property<int>("RoleId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("EmployeeId")
-                        .HasColumnType("int");
-
-                    b.HasKey("RoleId", "EmployeeId");
-
-                    b.HasIndex("EmployeeId");
-
-                    b.ToTable("EmployeeRoles");
                 });
 
             modelBuilder.Entity("DemoPractical.Models.Models.EmployeeType", b =>
@@ -221,25 +209,6 @@ namespace DemoPractical.DataAccessLayer.Migrations
                     b.Navigation("Department");
 
                     b.Navigation("EmployeeType");
-                });
-
-            modelBuilder.Entity("DemoPractical.Models.Models.EmployeeRole", b =>
-                {
-                    b.HasOne("DemoPractical.Models.Models.Employee", "Employee")
-                        .WithMany()
-                        .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DemoPractical.Models.Models.Role", "Role")
-                        .WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Employee");
-
-                    b.Navigation("Role");
                 });
 
             modelBuilder.Entity("DemoPractical.Models.Models.PermentEmployee", b =>
