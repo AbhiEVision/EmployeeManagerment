@@ -19,7 +19,11 @@ namespace DemoPractical.API.Controllers
 			_jwtServices = jwtServices;
 		}
 
-
+		/// <summary>
+		/// For Getting the JWT token which need for sending mail
+		/// </summary>
+		/// <param name="model"></param>
+		/// <returns></returns>
 		[HttpPost]
 		public async Task<IActionResult> Login(LoginDTO model)
 		{
