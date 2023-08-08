@@ -338,5 +338,10 @@ namespace DemoPractical.DataAccessLayer.Repositories
 
 			return await roles.ToListAsync();
 		}
+
+		public async Task<IEnumerable<Employee>> GetEmployeesAsync()
+		{
+			return await _db.Employees.ToListAsync();
+		}
 	}
 }

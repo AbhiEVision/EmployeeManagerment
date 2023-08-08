@@ -5,6 +5,8 @@ namespace DemoPractical.Domain.Interface
 {
 	public interface IEmployeeRepository
 	{
+		Task<IEnumerable<Employee>> GetEmployeesAsync();
+
 		Task<IEnumerable<EmployeeDetailsDTO>> GetEmployeeDetailsAsync();
 
 		Task<Employee> GetEmployeeByIdAsync(int id);
