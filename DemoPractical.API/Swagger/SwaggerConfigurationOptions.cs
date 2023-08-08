@@ -8,12 +8,12 @@ namespace DemoPractical.API.Swagger
 {
 	public class SwaggerConfigurationOptions : IConfigureNamedOptions<SwaggerGenOptions>
 	{
-		//private readonly IApiVersionDescriptionProvider _provider;
+		private readonly IApiVersionDescriptionProvider _provider;
 
-		//public SwaggerConfigurationOptions(IApiVersionDescriptionProvider provider)
-		//{
-		//	_provider = provider;
-		//}
+		public SwaggerConfigurationOptions(IApiVersionDescriptionProvider provider)
+		{
+			_provider = provider;
+		}
 
 
 		/// <summary>
@@ -49,13 +49,13 @@ namespace DemoPractical.API.Swagger
 			});
 			#endregion Create section to add JWT token
 
-			// add swagger document for every API version discovered
-			//foreach (var description in _provider.ApiVersionDescriptions)
-			//{
-			//	options.SwaggerDoc(
-			//		description.GroupName,
-			//		CreateVersionInfo(description));
-			//}
+			//add swagger document for every API version discovered
+			foreach (var description in _provider.ApiVersionDescriptions)
+			{
+				options.SwaggerDoc(
+					description.GroupName,
+					CreateVersionInfo(description));
+			}
 
 			//Enable from props => Documentation file(true) => leave path empty for default
 			// Set the comments path for the Swagger JSON and UI .

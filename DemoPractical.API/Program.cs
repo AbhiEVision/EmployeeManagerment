@@ -11,7 +11,11 @@ using DemoPractical.Models.Models;
 using DemoPractical.Models.ViewModel;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -60,6 +64,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+
+
 // Fluent Validation 
 builder.Services.AddFluentValidationAutoValidation();
 
@@ -96,20 +102,25 @@ builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, SwaggerConfi
 // Sentry Registration
 builder.WebHost.UseSentry();
 
-//// API Versing
-//builder.Services.AddApiVersioning(opt =>
-//{
-//	opt.AssumeDefaultVersionWhenUnspecified = true;
-//	opt.DefaultApiVersion = new ApiVersion(1, 0);
-//	opt.ReportApiVersions = true;
-//});
+// API Versing
+builder.Services.AddApiVersioning(opt =>
+{
+	opt.AssumeDefaultVersionWhenUnspecified = true;
+	opt.DefaultApiVersion = new ApiVersion(2, 1);
+	opt.ReportApiVersions = true;
+});
 
-////Setup API explorer that is API version aware
-//builder.Services.AddVersionedApiExplorer(setup =>
-//{
-//	setup.GroupNameFormat = "'v'VVV";
-//	setup.SubstituteApiVersionInUrl = true;
-//});
+//Setup API explorer that is API version aware
+builder.Services.AddVersionedApiExplorer(setup =>
+{
+	setup.GroupNameFormat = "'v'VVV";
+	setup.SubstituteApiVersionInUrl = true;
+});
+
+// Register Health Checks 
+builder.Services.AddHealthChecks()
+	.AddSqlServer(builder.Configuration.GetConnectionString("DemoApp"));
+
 
 #endregion
 
@@ -117,20 +128,36 @@ var app = builder.Build();
 
 #region Adding Middleware
 
+app.UseSwaggerUI(options =>
+{
+	var apiVersionDescriptionProvider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
+	foreach (var description in apiVersionDescriptionProvider.ApiVersionDescriptions)
+	{
+		options.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json",
+			description.GroupName.ToUpperInvariant());
+	}
+});
+
 if (app.Environment.IsDevelopment())
 {
 	app.UseSwagger();
 	app.UseSwaggerUI();
 }
 
-
+app.UseResponseCaching();
 app.UseHttpsRedirection();
 app.UseMiddleware<ErrorHandalingMiddleware>();
+
+app.MapHealthChecks("/_health", new HealthCheckOptions()
+{
+	ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+});
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
 
 app.Run();
 
